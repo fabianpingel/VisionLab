@@ -2,7 +2,7 @@
 
 Live-Objekterkennung als Demo-PWA — KI-Inferenz läuft **vollständig lokal im Browser**, keine Daten verlassen Ihr Gerät.
 
-Eine Demo-Anwendung von [PINGEL AI Solutions](https://pingel-ai-solutions.de).
+Eine Demo-Anwendung von [PINGEL AI Solutions](https://www.fabian-pingel.de).
 
 🔗 **Live-Demo:** [vision.pingel-ai-solutions.de](https://vision.pingel-ai-solutions.de)
 

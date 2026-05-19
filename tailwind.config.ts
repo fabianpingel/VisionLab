@@ -24,7 +24,7 @@ export default {
 
   theme: {
     extend: {
-      // Hier kommen später die Design-Tokens aus pingel-ai-solutions.de.
+      // Hier kommen später die Design-Tokens aus www.fabian-pingel.de.
       // CSS-Variablen werden in src/styles/tokens.css definiert,
       // Tailwind referenziert sie hier.
       colors: {
