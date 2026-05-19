@@ -19,12 +19,13 @@
  * Das hübsche Box-Overlay kommt in Phase 6.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useCamera } from '@/hooks/useCamera';
 import { useInference } from '@/hooks/useInference';
 import { Button } from '@/components/ui/Button';
 import { BoxOverlay } from '@/components/overlay/BoxOverlay';
 import { ControlsDrawer } from '@/components/controls/ControlsDrawer';
+import { StatsPanel } from '@/components/stats/StatsPanel';
 
 /**
  * Komponente, die das Kamerabild vollflächig darstellt und Inferenz fährt.
@@ -47,6 +48,7 @@ export function CameraView(): JSX.Element {
     availableModels,
     detections,
     fps,
+    fpsHistory,
     inferenceMs,
     currentModelId,
     switchModel,
@@ -54,6 +56,14 @@ export function CameraView(): JSX.Element {
     videoRef,
     enabled: camStatus === 'granted',
   });
+
+  // Aktuelles Modell-Spec aus der Liste lookup'en — wird ans StatsPanel
+  // gereicht, damit dort der DisplayName angezeigt werden kann.
+  // useMemo cached das Ergebnis, damit es nicht bei jedem Re-Render durchsucht wird.
+  const currentModel = useMemo(
+    () => availableModels.find((m) => m.id === currentModelId) ?? null,
+    [availableModels, currentModelId],
+  );
 
   /**
    * Beim ersten Render der Komponente: Kamera starten.
@@ -146,27 +156,17 @@ export function CameraView(): JSX.Element {
         mirror={facingMode === 'user'}
       />
 
-      {/* Inferenz-Status-Pille (oben links) — Phase-5-Debug-Anzeige.
-          Wird in Phase 8 durch ein schöneres Stats-Panel ersetzt. */}
-      <div className="absolute top-4 left-4 px-3 py-2 rounded-2xl
-                      bg-black/60 backdrop-blur-md border border-white/10
-                      text-xs text-white font-mono leading-relaxed
-                      pointer-events-none select-none">
-        {/* Status-Zeile */}
-        {infStatus === 'loading-manifest' && <div>Lade Modell-Liste …</div>}
-        {infStatus === 'spawning-worker' && <div>Starte Inferenz-Worker …</div>}
-        {infStatus === 'loading-model' && <div>Lade Modell …</div>}
-        {infStatus === 'error' && (
-          <div className="text-red-300">Fehler: {infError}</div>
-        )}
-        {infStatus === 'ready' && (
-          <>
-            <div>{Math.round(fps)} FPS · {inferenceMs.toFixed(0)} ms</div>
-            <div className="text-white/60">{backend?.toUpperCase()} · {currentModelId}</div>
-            <div className="text-white/40">{detections.length} Detektion(en)</div>
-          </>
-        )}
-      </div>
+      {/* Stats-Panel (Phase 8) — schwebend oben links, ersetzt die alte Debug-Pille. */}
+      <StatsPanel
+        status={infStatus}
+        error={infError}
+        backend={backend}
+        fps={fps}
+        fpsHistory={fpsHistory}
+        inferenceMs={inferenceMs}
+        detectionCount={detections.length}
+        currentModel={currentModel}
+      />
 
       {/* Einstellungen-Drawer (Trigger oben rechts, Drawer-Inhalt von unten) */}
       <ControlsDrawer

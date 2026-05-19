@@ -76,6 +76,8 @@ export type UseInferenceReturn = {
   detections: Detection[];
   /** Rollender FPS-Mittelwert. */
   fps: number;
+  /** Historie der letzten FPS-Werte für eine Sparkline (max FPS_WINDOW_SIZE Einträge). */
+  fpsHistory: number[];
   /** Letzte reine Modell-Inferenzzeit in ms. */
   inferenceMs: number;
   /** Wechselt aktiv das geladene Modell. */
@@ -108,6 +110,7 @@ export function useInference(options: UseInferenceOptions): UseInferenceReturn {
   const [currentModelId, setCurrentModelId] = useState<string | null>(null);
   const [detections, setDetections] = useState<Detection[]>([]);
   const [fps, setFps] = useState<number>(0);
+  const [fpsHistory, setFpsHistory] = useState<number[]>([]);
   const [inferenceMs, setInferenceMs] = useState<number>(0);
 
   // --- Refs (NICHT reaktiv, persistieren zwischen Renders) ---
@@ -211,7 +214,14 @@ export function useInference(options: UseInferenceOptions): UseInferenceReturn {
           if (window.length >= 2) {
             const span = window[window.length - 1] - window[0];
             const frames = window.length - 1;
-            setFps((frames * 1000) / span);
+            const newFps = (frames * 1000) / span;
+            setFps(newFps);
+            // FPS-History für die Sparkline: rollendes Fenster.
+            setFpsHistory((prev) => {
+              const next = prev.length >= FPS_WINDOW_SIZE ? prev.slice(1) : prev.slice();
+              next.push(newFps);
+              return next;
+            });
           }
         }
         setInferenceMs(msg.inferenceMs);
@@ -409,6 +419,7 @@ export function useInference(options: UseInferenceOptions): UseInferenceReturn {
     currentModelId,
     detections,
     fps,
+    fpsHistory,
     inferenceMs,
     switchModel,
   };
