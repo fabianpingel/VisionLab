@@ -1,0 +1,71 @@
+/* ============================================================================
+   globals.css — Globale Styles, die für die GESAMTE App gelten
+   ============================================================================
+
+   Diese Datei wird in main.tsx importiert und gilt damit für alle Seiten.
+
+   Drei Hauptbestandteile:
+     1. @tailwind-Direktiven: laden Tailwinds Basis-/Komponenten-/Utility-Layer
+     2. Eigene CSS-Variablen (Design-Tokens): Branding-Farben, Schriftgrößen
+     3. Globale Resets: z.B. body-Hintergrund, Touch-Verhalten
+
+   Die Design-Tokens werden in Phase 9 mit echten Werten aus
+   pingel-ai-solutions.de gefüllt — jetzt setzen wir nur Platzhalter.
+   ============================================================================ */
+
+/* Tailwind-Schichten (Reihenfolge ist wichtig!) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Design-Tokens als CSS-Variablen
+   ---------------------------------------------------------------------------
+   Vorteil: Wir können sie aus JavaScript ändern (z.B. Theme-Switch),
+   und Tailwind referenziert sie in tailwind.config.ts.
+   --------------------------------------------------------------------------- */
+:root {
+  /* Brand-Farben — Platzhalter, in Phase 9 mit echten Werten ersetzen */
+  --color-brand: #ffffff;
+  --color-brand-accent: #8b5cf6;
+
+  /* Surface-Farben (Hintergründe) */
+  --color-surface: rgba(255, 255, 255, 0.06);
+  --color-surface-elevated: rgba(255, 255, 255, 0.10);
+  --color-background: #0a0a0a;
+
+  /* Glassmorphism-Werte */
+  --glass-blur: 20px;
+  --glass-border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* ---------------------------------------------------------------------------
+   Globale Resets / Body-Styling
+   --------------------------------------------------------------------------- */
+html,
+body {
+  /* Verhindert Pull-to-Refresh und Bounce-Scroll auf Mobile.
+     Wichtig für eine App-Anmutung statt Webseiten-Anmutung. */
+  overscroll-behavior: none;
+  /* Schwarzer Hintergrund, falls Inhalte noch nicht geladen sind. */
+  background-color: var(--color-background);
+}
+
+body {
+  /* Antialiasing für schönere Schrift, vor allem auf Retina-Displays. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* System-Schriftfamilie als Fallback bis Phase 9 echte Schrift einsetzt. */
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+}
+
+/* iOS Safari: Tap-Highlights ausblenden (Hover-Effekte zeigen wir selbst). */
+* {
+  -webkit-tap-highlight-color: transparent;
+}

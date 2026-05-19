@@ -1,0 +1,19 @@
+// ============================================================================
+// tsconfig.json — Konfiguration für den TypeScript-Compiler (tsc).
+// ============================================================================
+// Vergleichbar mit der [tool.mypy] / [tool.pyright] Sektion in pyproject.toml.
+//
+// TypeScript unterstützt 'Project References' — wir teilen die Konfig in
+// zwei Teile auf:
+//   - tsconfig.app.json  → für den App-Code in src/
+//   - tsconfig.node.json → für Build-Tools-Code wie vite.config.ts
+//
+// Trennung erlaubt unterschiedliche Einstellungen (Browser-APIs vs. Node-APIs).
+// ============================================================================
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}

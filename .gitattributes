@@ -1,0 +1,17 @@
+# Zeilenenden plattformübergreifend einheitlich (LF)
+# Verhindert das CRLF-↔-LF-Hin-und-Her zwischen Windows und macOS/Linux.
+
+* text=auto eol=lf
+
+# Binärdateien — keine Konvertierung
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text
+*.pdf binary
+*.onnx binary
+*.pt binary
+*.woff binary
+*.woff2 binary

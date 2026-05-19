@@ -1,0 +1,51 @@
+// ============================================================================
+// tsconfig.app.json — TypeScript-Konfig für den App-Code in src/
+// ============================================================================
+{
+  "compilerOptions": {
+    // target: Welches JavaScript-Niveau soll generiert werden?
+    // ES2022 = moderne Features, alle Browser nach 2022 unterstützen das.
+    "target": "ES2022",
+
+    // useDefineForClassFields: strikte Klassen-Feld-Semantik nach moderner Spec.
+    "useDefineForClassFields": true,
+
+    // lib: Welche Web-APIs sind erlaubt?
+    // DOM         = Browser-APIs (document, window, ...)
+    // DOM.Iterable = for...of über NodeList & Co.
+    // WebWorker   = für unseren Inferenz-Worker
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+
+    // Modul-System: ESNext + Bundler-Resolution für Vite.
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    // noEmit: Wir generieren keine .js-Dateien — das macht Vite.
+    "noEmit": true,
+
+    // JSX wird von React verarbeitet (react-jsx = neue Transform ohne import React).
+    "jsx": "react-jsx",
+
+    // Strict-Mode: alle Strict-Optionen aktiv (wie 'strict = true' in mypy).
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+
+    // Pfad-Aliase: '@/components/Foo' statt '../../components/Foo'.
+    // Muss synchron mit "resolve.alias" in vite.config.ts sein.
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+
+    // Welche Typdefinitionen automatisch laden?
+    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"]
+  },
+
+  "include": ["src"]
+}

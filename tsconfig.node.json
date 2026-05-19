@@ -1,0 +1,27 @@
+// ============================================================================
+// tsconfig.node.json — TypeScript-Konfig für Node-Kontext (Build-Tools).
+// ============================================================================
+// vite.config.ts läuft in Node (nicht im Browser) — andere APIs verfügbar.
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+
+    "types": ["node"]
+  },
+
+  "include": ["vite.config.ts"]
+}
