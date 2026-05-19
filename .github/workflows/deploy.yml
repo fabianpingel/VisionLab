@@ -1,0 +1,126 @@
+# ============================================================================
+# .github/workflows/deploy.yml — CI + Deployment auf GitHub Pages
+# ============================================================================
+#
+# Was passiert hier?
+#   Bei jedem Push auf den main-Branch (oder manuellem Aufruf) läuft dieser
+#   Workflow durch drei Jobs:
+#
+#     1. test:   typecheck, lint, automatische Tests
+#     2. build:  npm run build → erzeugt dist/ inkl. PWA-Artefakten
+#     3. deploy: lädt dist/ als Pages-Artefakt hoch + aktiviert es live
+#
+#   Schlägt einer der Tests fehl → kein Deploy. Sicherheitsnetz, falls vor
+#   dem Push lokal mal ein Test vergessen wurde.
+#
+# Voraussetzungen im GitHub-Repo (einmalig manuell setzen):
+#   - Settings → Pages → Source: "GitHub Actions"
+#   - Settings → Pages → Custom domain: vision.pingel-ai-solutions.de
+#   - Settings → Pages → Enforce HTTPS: aktiv
+# ============================================================================
+
+name: CI + Deploy
+
+# Wann läuft der Workflow?
+on:
+  # Bei Push auf main automatisch.
+  push:
+    branches: [main]
+  # Erlaubt manuelles Anstoßen über die Actions-UI ("Re-run all jobs").
+  workflow_dispatch:
+
+# GitHub-Token-Berechtigungen für den gesamten Workflow.
+# pages + id-token sind Pflicht für die Pages-Deployment-Actions.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Nur ein Deployment gleichzeitig — verhindert Race-Conditions bei
+# schnellen aufeinanderfolgenden Pushes.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  # --------------------------------------------------------------------------
+  # Job 1: Tests laufen lassen (typecheck + lint + vitest)
+  # --------------------------------------------------------------------------
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          # Muss zu engines.node in package.json passen (>=20).
+          node-version: '20'
+          # cache: npm sorgt für schnelleres CI durch Wiederverwendung
+          # des npm-Cache zwischen Runs.
+          cache: 'npm'
+
+      - name: Abhängigkeiten installieren
+        # npm ci ist strikter als npm install (sieht package-lock.json
+        # als Quelle der Wahrheit, scheitert bei Drift).
+        run: npm ci
+
+      - name: TypeScript-Typecheck
+        run: npm run typecheck
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Vitest
+        run: npm run test
+
+  # --------------------------------------------------------------------------
+  # Job 2: Production-Build erzeugen und als Pages-Artefakt hochladen
+  # --------------------------------------------------------------------------
+  build:
+    name: Build
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: Production-Build
+        run: npm run build
+
+      - name: Pages-Konfiguration
+        # Setzt Umgebungsvariablen für das Pages-Deployment.
+        uses: actions/configure-pages@v5
+
+      - name: dist/ als Pages-Artefakt hochladen
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  # --------------------------------------------------------------------------
+  # Job 3: Das hochgeladene Artefakt auf vision.pingel-ai-solutions.de live schalten
+  # --------------------------------------------------------------------------
+  deploy:
+    name: Deploy zu GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    # environment: github-pages aktiviert das Pages-Deployment + zeigt die
+    # Live-URL im Workflow-Run-Status an.
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Auf GitHub Pages veröffentlichen
+        id: deployment
+        uses: actions/deploy-pages@v4
