@@ -94,15 +94,20 @@ export function DisclaimerModal(): JSX.Element {
           className="w-full max-w-xl"
         >
           <GlassPanel elevated className="p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
-            {/* Logo — zentriert oben */}
+            {/* Logo — zentriert oben.
+                Wichtige Mobile-Fixes:
+                  - flex-shrink-0 verhindert vertikale Stauchung im Flex-Container
+                    (iPhone SE Hochformat-Bug)
+                  - object-contain hält Aspect-Ratio garantiert
+                  - h-16 auf Mobile, h-20 ab sm: (640px) — schmale Geräte
+                    bekommen ein etwas kleineres Logo
+                  - max-w-[85%] hindert das Logo daran, über die Modal-
+                    Breite zu wachsen */}
             <div className="flex justify-center mb-6">
-              {/* Asset-Pfad: Vite serviert public/-Inhalte unter /, also
-                  /logo/pingel-logo-original.png. */}
               <img
                 src="/logo/pingel-logo-original.png"
                 alt="PINGEL AI Solutions"
-                // Logo-Größe: ca. 80px hoch, automatische Breite
-                className="h-20 w-auto"
+                className="h-16 sm:h-20 w-auto max-w-[85%] object-contain flex-shrink-0"
               />
             </div>
 
