@@ -57,6 +57,10 @@ __pycache__/
 # Modell-Quelldateien (.pt) — nur die exportierten .onnx werden committet
 *.pt
 
+# Zwischendateien des Export-Skripts (Ultralytics legt dort die .onnx ab,
+# bevor sie nach public/models/ kopiert wird — siehe export_yolo.py).
+scripts/*.onnx
+
 # Lokale Cloudflare-/Tunnel-Configs
 .cloudflared/
 
