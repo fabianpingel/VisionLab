@@ -23,6 +23,7 @@ import { useEffect, useRef } from 'react';
 import { useCamera } from '@/hooks/useCamera';
 import { useInference } from '@/hooks/useInference';
 import { Button } from '@/components/ui/Button';
+import { BoxOverlay } from '@/components/overlay/BoxOverlay';
 
 /**
  * Komponente, die das Kamerabild vollflächig darstellt und Inferenz fährt.
@@ -131,6 +132,15 @@ export function CameraView(): JSX.Element {
         className={`absolute inset-0 w-full h-full object-cover ${
           facingMode === 'user' ? 'scale-x-[-1]' : ''
         }`}
+      />
+
+      {/* Bounding-Box-Overlay über dem Video (Phase 6).
+          mirror=true bei Frontkamera — Overlay-Mathematik kompensiert die
+          CSS-Spiegelung, damit Boxen über den richtigen Objekten landen. */}
+      <BoxOverlay
+        videoRef={videoRef}
+        detections={detections}
+        mirror={facingMode === 'user'}
       />
 
       {/* Inferenz-Status-Pille (oben links) — Phase-5-Debug-Anzeige.
