@@ -42,18 +42,6 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
-# Globales Env für alle Jobs.
-# FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 zwingt alle JS-basierten GitHub-Actions
-# (checkout, setup-node, configure-pages, upload-pages-artifact, deploy-pages,
-#  ...) auf Node.js 24 zu laufen.
-#
-# Hintergrund: GitHub stuft Node.js 20 auf Runnern als deprecated ein und
-# schaltet ab 02. Juni 2026 zwangsweise auf Node 24 um (Entfernung 16. Sep 2026).
-# Das Flag ist die offizielle Migration und bewahrt uns vor dem Stichtag.
-# Siehe https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
-
 jobs:
   # --------------------------------------------------------------------------
   # Job 1: Tests laufen lassen (typecheck + lint + vitest)
@@ -113,10 +101,10 @@ jobs:
 
       - name: Pages-Konfiguration
         # Setzt Umgebungsvariablen für das Pages-Deployment.
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: dist/ als Pages-Artefakt hochladen
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
@@ -135,4 +123,4 @@ jobs:
     steps:
       - name: Auf GitHub Pages veröffentlichen
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
