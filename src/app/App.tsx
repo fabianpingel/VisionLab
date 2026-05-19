@@ -32,8 +32,8 @@ export default function App(): JSX.Element {
   const hasAccepted = useDisclaimerStore(selectHasAcceptedCurrent);
 
   return (
-    // Wurzel-Layout: vollflächig, dunkler Hintergrund.
-    <main className="min-h-screen w-full bg-neutral-950 text-neutral-100">
+    // Wurzel-Layout: vollflächig, Brand-Hintergrund (tiefes Navy aus den Design-Tokens).
+    <main className="min-h-screen w-full bg-background text-white font-sans">
       {hasAccepted ? <CameraView /> : <DisclaimerModal />}
     </main>
   );

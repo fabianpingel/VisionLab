@@ -63,12 +63,12 @@ export function ModelPicker({
             <label
               key={model.id}
               // flex-Layout: Radio links, Beschriftung daneben.
-              // hover/active wirken am ganzen Label (touch-friendly).
+              // Aktive Karte mit dezentem Amber-Schimmer (Brand-Akzent).
               className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer
                           transition-all duration-150
                           ${
                             isActive
-                              ? 'bg-white/10 border-white/30'
+                              ? 'bg-accent/10 border-accent/40'
                               : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06]'
                           }`}
             >
@@ -78,7 +78,7 @@ export function ModelPicker({
                 value={model.id}
                 checked={isActive}
                 onChange={() => onSwitch(model.id)}
-                className="mt-1 accent-white cursor-pointer"
+                className="mt-1 accent-accent cursor-pointer"
               />
               <div className="flex-1 min-w-0">
                 {/* Anzeigename + Größe in derselben Zeile */}

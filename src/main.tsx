@@ -19,6 +19,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './app/App';
+// Schriftart Montserrat Variable, selbst gehostet (kein CDN, kein Drittland).
+// Wird vom Vite-Bundler in die App eingebaut und unter /assets/ ausgeliefert.
+import '@fontsource-variable/montserrat';
 // CSS-Import: Wirkt für die GESAMTE App. Tailwind-Regeln werden hier geladen.
 import './styles/globals.css';
 

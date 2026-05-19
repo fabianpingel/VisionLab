@@ -3,16 +3,13 @@
  * tailwind.config.ts — Konfiguration für Tailwind CSS
  * ============================================================================
  *
- * Tailwind ist ein Utility-First-CSS-Framework: Statt CSS-Klassen wie
- * ".button-primary" zu definieren, schreibt man Utility-Klassen direkt im
- * HTML, z.B. <button class="bg-blue-500 px-4 py-2 rounded">.
+ * Tailwind ist Utility-First-CSS — statt eigener CSS-Klassen schreibt man
+ * Utility-Klassen direkt in JSX/HTML (z.B. `className="bg-accent px-4"`).
  *
- * Diese Datei sagt Tailwind:
- *   - Wo soll nach Klassen-Verwendungen gesucht werden ('content')
- *   - Welche eigenen Design-Tokens stehen zur Verfügung ('theme')
+ * Diese Datei verbindet unsere CSS-Variablen (src/styles/tokens.css) mit
+ * Tailwind, sodass man z.B. `bg-brand-navy` oder `text-accent` schreiben kann.
  *
- * Vergleichbar mit dem theme/style.css einer Streamlit-App,
- * nur mit deutlich mehr Konfigurationsmöglichkeiten.
+ * Branding-Quelle: www.fabian-pingel.de (PINGEL AI Solutions).
  */
 
 import type { Config } from 'tailwindcss';
@@ -24,26 +21,51 @@ export default {
 
   theme: {
     extend: {
-      // Hier kommen später die Design-Tokens aus www.fabian-pingel.de.
-      // CSS-Variablen werden in src/styles/tokens.css definiert,
-      // Tailwind referenziert sie hier.
+      // -----------------------------------------------------------------------
+      // Farben — alle als CSS-Variablen referenziert, damit man sie
+      // an einer Stelle (tokens.css) ändern kann.
+      // -----------------------------------------------------------------------
       colors: {
-        // Brand-Farben (Platzhalter — werden in Phase 9 mit echten Werten
-        // aus den DevTools der Website ersetzt).
+        // PINGEL Brand-Farben (1:1 von der Marken-Website)
         brand: {
-          DEFAULT: 'var(--color-brand)',
-          accent: 'var(--color-brand-accent)',
+          navy: 'var(--color-brand-navy)',
+          amber: 'var(--color-brand-amber)',
+          'amber-dark': 'var(--color-brand-amber-dark)',
         },
+        // Akzentfarbe (für aktive Buttons, Slider, Highlights)
+        accent: {
+          DEFAULT: 'var(--color-accent)',
+          hover: 'var(--color-accent-hover)',
+          dark: 'var(--color-accent-dark)',
+          on: 'var(--color-on-accent)',
+        },
+        // Hintergrund- und Surface-Farben
+        background: 'var(--color-background)',
         surface: {
           DEFAULT: 'var(--color-surface)',
           elevated: 'var(--color-surface-elevated)',
+          border: 'var(--color-surface-border)',
         },
       },
-      // Glassmorphism-Eckenradius für Karten und Modals
+
+      // -----------------------------------------------------------------------
+      // Schriftart — Montserrat Variable (selbst gehostet via @fontsource-variable)
+      // Tailwind-Klasse: font-sans
+      // -----------------------------------------------------------------------
+      fontFamily: {
+        sans: ['var(--font-sans)'],
+      },
+
+      // -----------------------------------------------------------------------
+      // Glassmorphism-Eckenradius (für Karten und Modals)
+      // -----------------------------------------------------------------------
       borderRadius: {
         glass: '24px',
       },
+
+      // -----------------------------------------------------------------------
       // Backdrop-Blur-Werte für Glaspanels
+      // -----------------------------------------------------------------------
       backdropBlur: {
         glass: '20px',
       },

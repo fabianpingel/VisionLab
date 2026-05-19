@@ -86,7 +86,7 @@ export function CameraView(): JSX.Element {
 
   if (camStatus === 'requesting' || camStatus === 'idle') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-950 text-white p-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background text-white p-6">
         <div className="animate-pulse text-sm text-white/70">
           Kamera wird gestartet …
         </div>
@@ -99,7 +99,7 @@ export function CameraView(): JSX.Element {
 
   if (camStatus === 'denied') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-950 text-white p-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background text-white p-6">
         <h2 className="text-xl font-semibold mb-3">Kamera-Erlaubnis fehlt</h2>
         <p className="text-sm text-white/70 text-center max-w-md leading-relaxed">
           Diese Demo benötigt Zugriff auf die Kamera, um Objekte erkennen zu können.
@@ -115,7 +115,7 @@ export function CameraView(): JSX.Element {
 
   if (camStatus === 'error') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-950 text-white p-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background text-white p-6">
         <h2 className="text-xl font-semibold mb-3">Kamera nicht verfügbar</h2>
         <p className="text-sm text-white/70 text-center max-w-md leading-relaxed">
           Es konnte keine Kamera initialisiert werden. Möglicherweise ist keine

@@ -64,9 +64,9 @@ export function ConfidenceSlider(): JSX.Element {
         step={0.01}
         value={value}
         onChange={handleChange}
-        // accent-color: native Slider-Farbe in modernen Browsern
-        // (Chrome 93+, Safari 15.4+, Firefox 92+).
-        className="w-full accent-white cursor-pointer"
+        // accent-color: native Slider-Farbe in modernen Browsern.
+        // Brand-Amber statt Weiß → Marken-Identität auch in Bedienelementen.
+        className="w-full accent-accent cursor-pointer"
         aria-label="Konfidenz-Schwelle"
       />
     </div>

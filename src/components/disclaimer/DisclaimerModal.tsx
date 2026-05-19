@@ -179,10 +179,8 @@ export function DisclaimerModal(): JSX.Element {
                 type="checkbox"
                 checked={hasAcknowledged}
                 onChange={(e) => setHasAcknowledged(e.target.checked)}
-                // Größere Checkbox + heller Akzent — Standard-Browser-
-                // Styling reicht hier; in Phase 9 ggf. mit eigenem Style ersetzen.
-                className="mt-0.5 h-4 w-4 rounded border-white/30 bg-transparent
-                           text-white focus:ring-white/50 cursor-pointer"
+                // accent-accent färbt die native Checkbox in Amber-Brand-Farbe.
+                className="mt-0.5 h-4 w-4 rounded accent-accent cursor-pointer"
                 aria-describedby="disclaimer-checkbox-label"
               />
               <span

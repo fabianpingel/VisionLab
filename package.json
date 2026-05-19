@@ -24,6 +24,7 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@fontsource-variable/montserrat": "^5.2.8",
     "framer-motion": "^11.15.0",
     "onnxruntime-web": "^1.21.0",
     "react": "^18.3.1",

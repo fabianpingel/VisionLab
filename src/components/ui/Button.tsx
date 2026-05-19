@@ -69,9 +69,10 @@ export function Button({
   ].join(' ');
 
   // Variant-spezifische Klassen.
-  // Object-Map statt switch-case → kompakter, leicht erweiterbar.
+  // Primary nutzt jetzt die Brand-Akzentfarbe (Amber-Gold von PINGEL).
+  // text-accent-on ist dabei dunkles Navy — bessere Lesbarkeit auf Amber als Weiß.
   const variantClasses: Record<ButtonVariant, string> = {
-    primary: 'bg-white text-neutral-900 hover:bg-neutral-100 active:scale-[0.98]',
+    primary: 'bg-accent text-accent-on hover:bg-accent-hover active:bg-accent-dark active:scale-[0.98]',
     secondary: 'bg-white/10 text-white hover:bg-white/15 active:scale-[0.98]',
     ghost: 'bg-transparent text-white/80 hover:text-white hover:bg-white/5',
   };
