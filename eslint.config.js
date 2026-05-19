@@ -19,7 +19,9 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 
 export default tseslint.config(
   // Dateien/Pfade, die ignoriert werden sollen.
-  { ignores: ['dist', 'node_modules', 'coverage'] },
+  // scripts/.venv ist die Python-virtuelle-Umgebung (uv) — enthält Bibliotheken,
+  // die JS-Files mitliefern (z.B. matplotlib). Die wollen wir nicht linten.
+  { ignores: ['dist', 'node_modules', 'coverage', 'scripts/.venv', 'scripts/**/*.py'] },
 
   // Hauptkonfiguration für TS/TSX-Dateien.
   {

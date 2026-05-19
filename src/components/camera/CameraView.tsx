@@ -1,69 +1,66 @@
 /**
  * ============================================================================
- * CameraView.tsx — Vollflächige Kamera-Ansicht mit Status-Behandlung
+ * CameraView.tsx — Vollflächige Kamera-Ansicht mit Inferenz-Anbindung
  * ============================================================================
  *
  * Diese Komponente:
  *   - Startet beim Mount automatisch die Kamera (useCamera-Hook)
  *   - Bindet den MediaStream an ein <video>-Element
+ *   - Startet parallel die Inferenz-Pipeline (useInference)
  *   - Zeigt je nach Permission-Zustand unterschiedliche UI:
  *       requesting → Hinweis "Kamera wird gestartet …"
- *       granted    → Vollflächiges Video + Switch-Button
+ *       granted    → Vollflächiges Video + Inferenz-Stats
  *       denied     → Hinweis "Erlaubnis verweigert" + Erklärung
  *       error      → Generische Fehlermeldung
  *
- * --- React-Konzept: useRef für DOM-Zugriff ---
- *
- * In klassischem HTML/JS würde man `document.getElementById(...)` nutzen.
- * In React greift man stattdessen mit `useRef` auf ein DOM-Element zu:
- *
- *   const videoRef = useRef<HTMLVideoElement>(null);
- *   ...
- *   <video ref={videoRef} ... />
- *
- * Beim Mount setzt React `videoRef.current` auf das echte <video>-Element.
- * So können wir z.B. `videoRef.current.srcObject = stream` setzen.
+ * Phase 5: Bounding Boxes werden NOCH NICHT gezeichnet — wir zeigen aber
+ * eine kleine Debug-Pille mit FPS und Detection-Count, damit wir
+ * verifizieren können, dass die Inferenz tatsächlich läuft.
+ * Das hübsche Box-Overlay kommt in Phase 6.
  */
 
 import { useEffect, useRef } from 'react';
 import { useCamera } from '@/hooks/useCamera';
+import { useInference } from '@/hooks/useInference';
 import { Button } from '@/components/ui/Button';
 
 /**
- * Komponente, die das Kamerabild vollflächig darstellt.
- *
- * Nimmt keine Props entgegen — sie ist ein in sich abgeschlossener Baustein,
- * der bei Mount automatisch die Kamera anfordert.
+ * Komponente, die das Kamerabild vollflächig darstellt und Inferenz fährt.
  *
  * @returns JSX-Element der Kamera-Ansicht.
  */
 export function CameraView(): JSX.Element {
-  // Hook aufrufen — die gesamte Kamera-Logik kommt aus diesem Aufruf.
-  const { stream, status, error, facingMode, start, switchFacing } = useCamera({
-    initialFacing: 'environment',
-  });
+  // Kamera-Hook
+  const { stream, status: camStatus, error: camError, facingMode, start, switchFacing } =
+    useCamera({ initialFacing: 'environment' });
 
-  // Referenz auf das <video>-Element für die Stream-Bindung.
+  // Ref auf das <video>-Element für die Stream-Bindung.
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Inferenz-Hook. Wird aktiviert, sobald die Kamera läuft.
+  const {
+    status: infStatus,
+    error: infError,
+    backend,
+    detections,
+    fps,
+    inferenceMs,
+    currentModelId,
+  } = useInference({
+    videoRef,
+    enabled: camStatus === 'granted',
+  });
 
   /**
    * Beim ersten Render der Komponente: Kamera starten.
-   *
-   * Das leere dependency-Array [] sorgt dafür, dass dieser Effect NUR EINMAL
-   * läuft (analog zu `if __name__ == "__main__":`-Block in Python, nur dass
-   * es beim Komponenten-Mount läuft).
    */
   useEffect(() => {
     start();
-    // Cleanup wird vom useCamera-Hook selbst beim Unmount erledigt.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
    * Wenn sich der Stream ändert: an das <video>-Element binden.
-   *
-   * Hier nutzen wir `srcObject` statt `src` — das ist der moderne Weg,
-   * MediaStreams (nicht URLs) ans Video zu hängen.
    */
   useEffect(() => {
     if (videoRef.current && stream) {
@@ -71,10 +68,9 @@ export function CameraView(): JSX.Element {
     }
   }, [stream]);
 
-  // --- UI-Auswahl je nach Status ---
+  // --- UI-Auswahl je nach Kamera-Status ---
 
-  if (status === 'requesting' || status === 'idle') {
-    // Anzeige während die Permission noch verhandelt wird.
+  if (camStatus === 'requesting' || camStatus === 'idle') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-950 text-white p-6">
         <div className="animate-pulse text-sm text-white/70">
@@ -87,8 +83,7 @@ export function CameraView(): JSX.Element {
     );
   }
 
-  if (status === 'denied') {
-    // Permission verweigert — Erklärung + Retry-Button.
+  if (camStatus === 'denied') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-950 text-white p-6">
         <h2 className="text-xl font-semibold mb-3">Kamera-Erlaubnis fehlt</h2>
@@ -97,19 +92,14 @@ export function CameraView(): JSX.Element {
           Bitte erlauben Sie den Zugriff in den Browser-Einstellungen für diese Seite
           und laden Sie die Seite anschließend neu.
         </p>
-        <Button
-          variant="primary"
-          className="mt-6"
-          onClick={() => start()}
-        >
+        <Button variant="primary" className="mt-6" onClick={() => start()}>
           Erneut versuchen
         </Button>
       </div>
     );
   }
 
-  if (status === 'error') {
-    // Sonstiger Fehler — z.B. keine Kamera, Hardware-Konflikt.
+  if (camStatus === 'error') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-950 text-white p-6">
         <h2 className="text-xl font-semibold mb-3">Kamera nicht verfügbar</h2>
@@ -117,33 +107,22 @@ export function CameraView(): JSX.Element {
           Es konnte keine Kamera initialisiert werden. Möglicherweise ist keine
           Kamera angeschlossen oder wird gerade von einer anderen Anwendung verwendet.
         </p>
-        {error && (
+        {camError && (
           <p className="text-xs text-white/40 mt-3 font-mono">
-            {error.name}: {error.message}
+            {camError.name}: {camError.message}
           </p>
         )}
-        <Button
-          variant="secondary"
-          className="mt-6"
-          onClick={() => start()}
-        >
+        <Button variant="secondary" className="mt-6" onClick={() => start()}>
           Erneut versuchen
         </Button>
       </div>
     );
   }
 
-  // status === 'granted' — Stream läuft, Video anzeigen.
+  // camStatus === 'granted' — Stream läuft, Video + Stats anzeigen.
   return (
-    // Wurzel: Vollbild, schwarzer Hintergrund (falls Video-Aspect nicht passt).
     <div className="relative w-full h-screen bg-black overflow-hidden">
-      {/* Das Video-Element:
-          - autoPlay startet das Abspielen sobald srcObject gesetzt ist
-          - muted ist Pflicht für autoPlay in iOS Safari
-          - playsInline verhindert Vollbild-Übernahme durch iOS Safari
-          - object-cover sorgt für vollflächigen Fit (mit ggf. leichtem Crop)
-          - Die Front-Kamera spiegeln wir, weil Nutzer das so erwarten
-            (Selfie-Mirror) */}
+      {/* Video-Stream im Hintergrund */}
       <video
         ref={videoRef}
         autoPlay
@@ -154,23 +133,43 @@ export function CameraView(): JSX.Element {
         }`}
       />
 
-      {/* Kamera-Switch-Button: schwebend unten rechts.
-          Glaspille als Tap-Target — Touch-freundlich groß (>= 44 px). */}
+      {/* Inferenz-Status-Pille (oben links) — Phase-5-Debug-Anzeige.
+          Wird in Phase 8 durch ein schöneres Stats-Panel ersetzt. */}
+      <div className="absolute top-4 left-4 px-3 py-2 rounded-2xl
+                      bg-black/60 backdrop-blur-md border border-white/10
+                      text-xs text-white font-mono leading-relaxed
+                      pointer-events-none select-none">
+        {/* Status-Zeile */}
+        {infStatus === 'loading-manifest' && <div>Lade Modell-Liste …</div>}
+        {infStatus === 'spawning-worker' && <div>Starte Inferenz-Worker …</div>}
+        {infStatus === 'loading-model' && <div>Lade Modell …</div>}
+        {infStatus === 'error' && (
+          <div className="text-red-300">Fehler: {infError}</div>
+        )}
+        {infStatus === 'ready' && (
+          <>
+            <div>{Math.round(fps)} FPS · {inferenceMs.toFixed(0)} ms</div>
+            <div className="text-white/60">{backend?.toUpperCase()} · {currentModelId}</div>
+            <div className="text-white/40">{detections.length} Detektion(en)</div>
+          </>
+        )}
+      </div>
+
+      {/* Kamera-Switch-Button: schwebend unten rechts */}
       <button
         type="button"
         onClick={switchFacing}
         aria-label={
-          facingMode === 'environment' ? 'Zur Frontkamera wechseln' : 'Zur Rückkamera wechseln'
+          facingMode === 'environment'
+            ? 'Zur Frontkamera wechseln'
+            : 'Zur Rückkamera wechseln'
         }
-        // Glas-Look + Position
         className="absolute bottom-6 right-6 w-14 h-14 rounded-full
                    bg-white/10 backdrop-blur-glass border border-white/20
                    flex items-center justify-center text-white
                    hover:bg-white/15 active:scale-95
                    transition-all duration-200 shadow-lg"
       >
-        {/* Inline-SVG-Icon (Kamera-Tausch-Pfeil).
-            Quelle: Heroicons "arrows-right-left" — frei (MIT). */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
