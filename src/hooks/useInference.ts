@@ -29,9 +29,11 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 // Der Default-Export ist eine Klasse, die mit `new` einen Worker erzeugt.
 import InferenceWorker from '@/inference/worker?worker';
 import { preprocessFrame } from '@/inference/preprocess';
+import { useSettingsStore } from '@/stores/settingsStore';
 import type {
   Detection,
   InferenceBackend,
+  InferenceSettings,
   ModelManifest,
   ModelSpec,
   WorkerToMainMessage,
@@ -231,6 +233,37 @@ export function useInference(options: UseInferenceOptions): UseInferenceReturn {
     availableModelsRef.current = availableModels;
   }, [availableModels]);
 
+  // --------------------------------------------------------------------------
+  // Live-Settings-Snapshot
+  // --------------------------------------------------------------------------
+  // Wir lesen die aktuellen Werte aus dem Settings-Store und halten sie in
+  // einer Ref. Der RAF-Loop liest die Ref synchron beim nächsten Frame —
+  // so wirken Änderungen ohne neuen Effect-Lauf, sofort beim nächsten Frame.
+  const settingsRef = useRef<InferenceSettings>({
+    scoreThreshold: 0.45,
+    iouThreshold: 0.45,
+  });
+  // useSettingsStore.subscribe() ist ein Vanilla-Subscriber außerhalb der
+  // React-Reconciliation — perfekt für RAF-Loop-Reads.
+  useEffect(() => {
+    // Initial-Lesen
+    const initial = useSettingsStore.getState();
+    settingsRef.current = {
+      scoreThreshold: initial.confidenceThreshold,
+      iouThreshold: initial.iouThreshold,
+      enabledClassIds: initial.enabledClassIds,
+    };
+    // Bei jedem Store-Update auch die Ref aktualisieren
+    const unsubscribe = useSettingsStore.subscribe((state) => {
+      settingsRef.current = {
+        scoreThreshold: state.confidenceThreshold,
+        iouThreshold: state.iouThreshold,
+        enabledClassIds: state.enabledClassIds,
+      };
+    });
+    return unsubscribe;
+  }, []);
+
   /**
    * Initial-Effect: Manifest laden, Worker spawnen, Modell laden.
    *
@@ -346,6 +379,8 @@ export function useInference(options: UseInferenceOptions): UseInferenceReturn {
             originalWidth: pre.originalWidth,
             originalHeight: pre.originalHeight,
             letterbox: pre.letterbox,
+            // Snapshot der aktuellen Settings — jeder Frame trägt seine eigenen
+            settings: settingsRef.current,
           },
           [pre.input.buffer], // Transferable Liste
         );

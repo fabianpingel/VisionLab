@@ -57,17 +57,6 @@ let activeModelSpec: ModelSpec | null = null;
 let activeBackend: InferenceBackend = 'wasm';
 
 /**
- * Standard-Konfidenz-Threshold für die Inferenz.
- * Wird später vom Main-Thread per Message überschreibbar gemacht.
- */
-const DEFAULT_SCORE_THRESHOLD = 0.45;
-
-/**
- * Standard-IoU-Threshold für Non-Maximum-Suppression.
- */
-const DEFAULT_IOU_THRESHOLD = 0.45;
-
-/**
  * Hilfsfunktion: typsicher eine Nachricht ans Main-Thread schicken.
  *
  * `self` ist im Worker-Scope das globale Objekt — entspricht `window`
@@ -196,15 +185,22 @@ async function runInference(msg: MainToWorkerMessage & { type: 'infer' }): Promi
     // Output-Daten als Float32Array extrahieren.
     const outputData = outputTensor.data as Float32Array;
 
+    // Klassenfilter: Wenn enabledClassIds gesetzt ist, in ein Set umwandeln
+    // (für O(1)-Lookup im Postprocessing-Loop). Wenn undefined → alle erlaubt.
+    const allowedClassIds = msg.settings.enabledClassIds
+      ? new Set(msg.settings.enabledClassIds)
+      : undefined;
+
     // Postprocessing: rohe Modell-Ausgabe → strukturierte Detektionen.
     const detections: Detection[] = postprocessYolo11(outputData, {
       classNames: activeModelSpec.classes,
-      scoreThreshold: DEFAULT_SCORE_THRESHOLD,
-      iouThreshold: DEFAULT_IOU_THRESHOLD,
+      scoreThreshold: msg.settings.scoreThreshold,
+      iouThreshold: msg.settings.iouThreshold,
       letterbox: msg.letterbox,
       originalWidth: msg.originalWidth,
       originalHeight: msg.originalHeight,
       modelSize: activeModelSpec.inputSize[2], // height (= width für YOLO11)
+      allowedClassIds,
     });
 
     send({

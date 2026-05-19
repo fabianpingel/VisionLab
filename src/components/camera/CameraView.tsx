@@ -24,6 +24,7 @@ import { useCamera } from '@/hooks/useCamera';
 import { useInference } from '@/hooks/useInference';
 import { Button } from '@/components/ui/Button';
 import { BoxOverlay } from '@/components/overlay/BoxOverlay';
+import { ControlsDrawer } from '@/components/controls/ControlsDrawer';
 
 /**
  * Komponente, die das Kamerabild vollflächig darstellt und Inferenz fährt.
@@ -43,10 +44,12 @@ export function CameraView(): JSX.Element {
     status: infStatus,
     error: infError,
     backend,
+    availableModels,
     detections,
     fps,
     inferenceMs,
     currentModelId,
+    switchModel,
   } = useInference({
     videoRef,
     enabled: camStatus === 'granted',
@@ -164,6 +167,13 @@ export function CameraView(): JSX.Element {
           </>
         )}
       </div>
+
+      {/* Einstellungen-Drawer (Trigger oben rechts, Drawer-Inhalt von unten) */}
+      <ControlsDrawer
+        models={availableModels}
+        currentModelId={currentModelId}
+        onSwitchModel={switchModel}
+      />
 
       {/* Kamera-Switch-Button: schwebend unten rechts */}
       <button

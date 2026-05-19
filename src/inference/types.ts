@@ -91,6 +91,22 @@ export type InferenceBackend = 'webgpu' | 'wasm';
 // ===========================================================================
 
 /**
+ * Postprocessing-Settings, die pro Frame mitgesendet werden.
+ *
+ * Wir schicken sie mit dem Frame statt sie im Worker zu cachen — damit
+ * Settings-Updates atomar mit dem nächsten Frame wirksam werden und es
+ * keine Race-Conditions zwischen "Settings ändern" und "Frame inferieren" gibt.
+ */
+export type InferenceSettings = {
+  /** Konfidenz-Schwelle: Detektionen unter diesem Score werden verworfen. */
+  scoreThreshold: number;
+  /** IoU-Schwelle für Non-Maximum-Suppression. */
+  iouThreshold: number;
+  /** Sortiertes Array erlaubter Klassen-IDs (oder undefined für "alle"). */
+  enabledClassIds?: number[];
+};
+
+/**
  * Nachrichten, die vom Main-Thread an den Worker geschickt werden.
  */
 export type MainToWorkerMessage =
@@ -112,6 +128,8 @@ export type MainToWorkerMessage =
       originalHeight: number;
       /** Letterbox-Parameter (Padding + Scale), für Postprocessing. */
       letterbox: LetterboxParams;
+      /** Settings für Postprocessing dieses Frames. */
+      settings: InferenceSettings;
     };
 
 /**
